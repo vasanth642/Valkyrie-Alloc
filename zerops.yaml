@@ -5,7 +5,11 @@ zerops:
       buildCommands:
         - npm install
       deployFiles:
-        - ./
+        - server.js
+        - package.json
+        - package-lock.json
+        - node_modules
+        - public
       cache:
         - node_modules
     run:
@@ -13,4 +17,12 @@ zerops:
       ports:
         - port: 5000
           httpSupport: true
+      envVariables:
+        DB_HOST: db
+        DB_PORT: 5432
+        DB_USER: ${db_user}
+        DB_PASSWORD: ${db_password}
+        DB_NAME: ${db_database}
+        VALKEY_HOST: valkey
+        VALKEY_PORT: 6379
       start: node server.js
