@@ -7,6 +7,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+  if (process.env.DISABLE_LANDING_PAGE === 'true') {
+    return res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  }
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 const redis = new Redis({
   host: process.env.VALKEY_HOST || 'valkey',
   port: parseInt(process.env.VALKEY_PORT || '6379', 10),
