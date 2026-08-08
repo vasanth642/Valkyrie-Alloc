@@ -1,0 +1,14 @@
+zerops:
+  - setup: api
+    build:
+      base: nodejs@20
+      buildCommands:
+        - npm install
+      deployFiles:
+        - .
+    run:
+      base: nodejs@20
+      ports:
+        - port: 5000
+          httpSupport: true
+      start: node server.js

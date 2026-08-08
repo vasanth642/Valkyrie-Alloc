@@ -1,0 +1,28 @@
+{
+  "name": "valkyrie-alloc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vasanth642/Valkyrie-Alloc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/vasanth642/Valkyrie-Alloc/issues"
+  },
+  "homepage": "https://github.com/vasanth642/Valkyrie-Alloc#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "expess": "^0.0.1-security",
+    "ioredis": "^6.0.0",
+    "pg": "^8.22.0"
+  }
+}
