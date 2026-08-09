@@ -4,12 +4,7 @@ zerops:
       base: nodejs@20
       buildCommands:
         - npm install
-      deployFiles:
-        - server.js
-        - package.json
-        - package-lock.json
-        - node_modules
-        - public
+      deployFiles: ./
       cache:
         - node_modules
     run:
