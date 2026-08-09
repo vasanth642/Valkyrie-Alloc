@@ -4,6 +4,7 @@ zerops:
       base: nodejs@20
       buildCommands:
         - npm install
+        - npm run build
       deployFiles: ./
       cache:
         - node_modules
