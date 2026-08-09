@@ -127,9 +127,8 @@ export default function App() {
             {/* Navigation Header */}
             <header className="relative z-10 max-w-7xl mx-auto w-full px-6 py-6 flex justify-between items-center border-b border-violet-900/30">
                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => !productionMode && setActiveTab('landing')}>
-                    {/* NEW LOGO IMAGE BLOCK */}
                     <img
-                        src="/public/logo.png.png"
+                        src="/logo.png"
                         alt="ValkyrieAlloc Logo"
                         className="w-10 h-10 rounded-2xl object-cover border border-violet-800/40 shadow-md shadow-violet-900/30"
                     />
@@ -162,8 +161,8 @@ export default function App() {
                         </button>
                     </nav>
                 ) : (
-                    <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-xs text-emerald-400 font-mono">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-950/60 border border-violet-800/60 text-xs text-violet-300 font-mono">
+                        <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></span>
                         Production Mode Active
                     </div>
                 )}
@@ -198,7 +197,7 @@ export default function App() {
                                 <span className="text-xs font-mono text-slate-300">Production Mode:</span>
                                 <button
                                     onClick={() => setProductionMode(!productionMode)}
-                                    className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${productionMode ? 'bg-emerald-600' : 'bg-slate-700'}`}
+                                    className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${productionMode ? 'bg-violet-600' : 'bg-slate-700'}`}
                                 >
                                     <motion.div
                                         layout
@@ -226,7 +225,7 @@ export default function App() {
                             {/* Hero Header */}
                             <section className="text-center max-w-4xl mx-auto my-10">
                                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#121024] border border-violet-800/50 text-xs text-violet-300 font-mono mb-6">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></span>
                                     Sub-Millisecond Valkey Gate • Zero SQL Locks
                                 </div>
                                 <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.15] mb-6">
@@ -254,7 +253,7 @@ export default function App() {
                                 </div>
                             </section>
 
-                            {/* Bento Feature Cards - Lowered with mt-16 to avoid colliding with curve */}
+                            {/* Bento Feature Cards */}
                             <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 mb-16">
                                 <div className="bento-card p-8">
                                     <div className="text-3xl font-black text-violet-400 font-mono mb-2">&lt; 0.5ms</div>
@@ -265,7 +264,7 @@ export default function App() {
                                 </div>
 
                                 <div className="bento-card p-8">
-                                    <div className="text-3xl font-black text-emerald-400 font-mono mb-2">0 Defect</div>
+                                    <div className="text-3xl font-black text-violet-300 font-mono mb-2">0 Defect</div>
                                     <h3 className="text-base font-extrabold text-white mb-2">Concurrency Protection</h3>
                                     <p className="text-sm text-slate-400 leading-relaxed">
                                         Guarantees exact inventory integrity under thousands of parallel connections. No oversold items, no matter how high the spike.
@@ -327,17 +326,17 @@ export default function App() {
                                     </div>
                                     <div className="bg-black/40 p-5 rounded-2xl border border-violet-900/40 text-center">
                                         <span className="text-xs text-slate-400 font-medium">Approved Claims (200 OK)</span>
-                                        <div className="text-3xl font-black text-emerald-400 my-2 font-mono">{claimed}</div>
-                                        <span className="text-xs text-emerald-500/80">Secured in RAM</span>
+                                        <div className="text-3xl font-black text-violet-300 my-2 font-mono">{claimed}</div>
+                                        <span className="text-xs text-violet-400/80">Secured in RAM</span>
                                     </div>
                                     <div className="bg-black/40 p-5 rounded-2xl border border-violet-900/40 text-center">
                                         <span className="text-xs text-slate-400 font-medium">Instant Rejections (409)</span>
-                                        <div className="text-3xl font-black text-rose-400 my-2 font-mono">{rejected}</div>
-                                        <span className="text-xs text-rose-500/80">Blocked at Gate</span>
+                                        <div className="text-3xl font-black text-slate-300 my-2 font-mono">{rejected}</div>
+                                        <span className="text-xs text-slate-400">Blocked at Gate</span>
                                     </div>
                                     <div className="bg-black/40 p-5 rounded-2xl border border-violet-900/40 text-center">
                                         <span className="text-xs text-slate-400 font-medium">Oversold Defect Count</span>
-                                        <div className="text-3xl font-black text-emerald-400 my-2 font-mono">0</div>
+                                        <div className="text-3xl font-black text-violet-300 my-2 font-mono">0</div>
                                         <span className="text-xs text-slate-500">Race Conditions: 0</span>
                                     </div>
                                 </div>
@@ -391,7 +390,7 @@ export default function App() {
                                 </p>
                             </div>
 
-                            {/* Step 2 (Apple macOS Window Box) */}
+                            {/* Step 2 (Apple macOS Window Box Restored) */}
                             <div className="bento-card p-6 md:p-8">
                                 <div className="text-xs font-mono text-violet-400 font-bold mb-1">STEP 2</div>
                                 <h3 className="text-lg font-bold text-white mb-3">Add zerops.yaml Configuration</h3>
@@ -431,7 +430,7 @@ export default function App() {
                                 </div>
                             </div>
 
-                            {/* Step 3 (Apple macOS Window Box) */}
+                            {/* Step 3 (Apple macOS Window Box Restored) */}
                             <div className="bento-card p-6 md:p-8">
                                 <div className="text-xs font-mono text-violet-400 font-bold mb-1">STEP 3</div>
                                 <h3 className="text-lg font-bold text-white mb-3">Set Initial Stock in Memory</h3>
@@ -445,14 +444,14 @@ export default function App() {
                                         <span className="text-xs font-mono text-slate-400 ml-2">terminal — init.sh</span>
                                     </div>
                                     <div className="p-4">
-                                        <code className="text-xs md:text-sm font-mono text-emerald-400 block overflow-x-auto">
+                                        <code className="text-xs md:text-sm font-mono text-violet-300 block overflow-x-auto">
                                             curl -X POST https://your-api.zerops.app/api/init -H "Content-Type: application/json" -d '&#123;"itemId":"item_1","initialStock":100&#125;'
                                         </code>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Step 4 (Apple macOS Window Box) */}
+                            {/* Step 4 (Apple macOS Window Box Restored) */}
                             <div className="bento-card p-6 md:p-8">
                                 <div className="text-xs font-mono text-violet-400 font-bold mb-1">STEP 4</div>
                                 <h3 className="text-lg font-bold text-white mb-3">Connect Checkout to the Gate</h3>
@@ -530,12 +529,12 @@ if (res.status === 200) {
                                 </div>
                                 <div className="bento-card p-5 text-center">
                                     <span className="text-xs text-slate-400 font-medium">PostgreSQL Orders</span>
-                                    <div className="text-3xl font-black text-emerald-400 my-1 font-mono">{sqlCount}</div>
-                                    <span className="text-xs text-emerald-500/80">Persisted Records</span>
+                                    <div className="text-3xl font-black text-violet-300 my-1 font-mono">{sqlCount}</div>
+                                    <span className="text-xs text-violet-400/80">Persisted Records</span>
                                 </div>
                                 <div className="bento-card p-5 text-center">
                                     <span className="text-xs text-slate-400 font-medium">Execution Speed</span>
-                                    <div className="text-3xl font-black text-emerald-400 my-1 font-mono">&lt; 0.5 ms</div>
+                                    <div className="text-3xl font-black text-violet-300 my-1 font-mono">&lt; 0.5 ms</div>
                                     <span className="text-xs text-slate-500">Served from RAM</span>
                                 </div>
                             </div>
@@ -546,7 +545,7 @@ if (res.status === 200) {
                                     <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
                                         Confirmed Reservations (PostgreSQL Table)
                                     </h3>
-                                    <span className="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-0.5 rounded-full">
+                                    <span className="text-xs font-mono text-violet-300 bg-violet-950/60 border border-violet-800/60 px-2.5 py-0.5 rounded-full">
                                         Live Stream Active
                                     </span>
                                 </div>
@@ -570,9 +569,9 @@ if (res.status === 200) {
                                                 logs.map(log => (
                                                     <tr key={log.id} className="hover:bg-slate-800/40 transition">
                                                         <td className="py-2.5 text-violet-400">#{log.id}</td>
-                                                        <td className="text-emerald-400 font-semibold">{log.user_id}</td>
+                                                        <td className="text-violet-300 font-semibold">{log.user_id}</td>
                                                         <td>{log.item_id}</td>
-                                                        <td><span className="bg-emerald-950 text-emerald-300 border border-emerald-800/60 px-2 py-0.5 rounded text-[10px]">{log.status}</span></td>
+                                                        <td><span className="bg-violet-950 text-violet-300 border border-violet-800/60 px-2 py-0.5 rounded text-[10px]">{log.status}</span></td>
                                                         <td className="text-slate-500">{new Date(log.created_at).toLocaleString()}</td>
                                                     </tr>
                                                 ))
