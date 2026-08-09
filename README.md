@@ -10,6 +10,10 @@ Intercept high-traffic checkout spikes in RAM before they touch relational datab
 [![React](https://img.shields.io/badge/Frontend-React-61DAFB.svg)](https://react.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+<p align="center">
+  <img src="./readme-banner.png" alt="ValkyrieAlloc" width="100%">
+</p>
+
 ---
 
 ## The Problem: Flash Sale Infrastructure Collapse
