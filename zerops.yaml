@@ -21,4 +21,5 @@ zerops:
         DB_NAME: ${db_database}
         VALKEY_HOST: valkey
         VALKEY_PORT: 6379
+        VALKEY_PASSWORD: ${valkey_password}
       start: node server.js

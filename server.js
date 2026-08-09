@@ -30,9 +30,18 @@ const pool = new Pool({
 
 // Valkey / Redis connection
 const redis = new Redis({
-  host: process.env.VALKEY_HOST || 'valkey',
-  port: parseInt(process.env.VALKEY_PORT || '6379', 10),
+  host: process.env.VALKEY_HOST || process.env.REDIS_HOST || 'valkey',
+  port: parseInt(process.env.VALKEY_PORT || process.env.REDIS_PORT || '6379', 10),
+  password: process.env.VALKEY_PASSWORD || process.env.REDIS_PASSWORD || undefined,
   retryStrategy: (times) => Math.min(times * 50, 2000),
+  maxRetriesPerRequest: 3,
+});
+
+redis.on('error', (err) => {
+  // Prevent unhandled error crashes
+  if (!err.message.includes('NOAUTH')) {
+    console.error('[Valkey Redis Error]:', err.message);
+  }
 });
 
 // Initialize database table schema
