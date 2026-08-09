@@ -2,8 +2,9 @@
   "name": "valkyrie-alloc",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,10 +20,10 @@
   },
   "homepage": "https://github.com/vasanth642/Valkyrie-Alloc#readme",
   "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "expess": "^0.0.1-security",
-    "ioredis": "^6.0.0",
-    "pg": "^8.22.0"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ioredis": "^5.4.1",
+    "pg": "^8.11.5"
   }
 }
