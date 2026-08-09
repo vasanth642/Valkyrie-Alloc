@@ -3,26 +3,21 @@ const Redis = require('ioredis');
 const { Pool } = require('pg');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, 'public')));
+// Paths for build static assets
+const publicPath = path.join(__dirname, 'public');
+const distPath = path.join(__dirname, 'dist');
 
-app.get('/', (req, res) => {
-  if (process.env.DISABLE_LANDING_PAGE === 'true') {
-    return res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-  }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// Serve static assets from build output directories
+app.use(express.static(distPath));
+app.use(express.static(publicPath));
 
-const redis = new Redis({
-  host: process.env.VALKEY_HOST || 'valkey',
-  port: parseInt(process.env.VALKEY_PORT || '6379', 10),
-  retryStrategy: (times) => Math.min(times * 50, 2000),
-});
-
+// Database connection pool (Zerops / Local defaults)
 const pool = new Pool({
   host: process.env.DB_HOST || 'db',
   port: parseInt(process.env.DB_PORT || '5432', 10),
@@ -33,6 +28,14 @@ const pool = new Pool({
   idleTimeoutMillis: 30000,
 });
 
+// Valkey / Redis connection
+const redis = new Redis({
+  host: process.env.VALKEY_HOST || 'valkey',
+  port: parseInt(process.env.VALKEY_PORT || '6379', 10),
+  retryStrategy: (times) => Math.min(times * 50, 2000),
+});
+
+// Initialize database table schema
 async function initDatabaseSchema() {
   const createTableQuery = `
     CREATE TABLE IF NOT EXISTS reservations (
@@ -53,6 +56,7 @@ async function initDatabaseSchema() {
   }
 }
 
+// Atomic Lua evaluation script
 const RESERVE_LUA_SCRIPT = `
   local stockKey = KEYS[1]
   local currentStock = tonumber(redis.call('get', stockKey) or '0')
@@ -64,6 +68,7 @@ const RESERVE_LUA_SCRIPT = `
   end
 `;
 
+// Initialize stock in RAM
 app.post('/api/init', async (req, res) => {
   try {
     const { itemId = 'item_1', initialStock = 50 } = req.body;
@@ -87,6 +92,7 @@ app.post('/api/init', async (req, res) => {
   }
 });
 
+// Atomic reservation endpoint
 app.post('/api/reserve', async (req, res) => {
   try {
     const { itemId = 'item_1', userId = 'user_anon' } = req.body;
@@ -94,6 +100,7 @@ app.post('/api/reserve', async (req, res) => {
     const remainingStock = await redis.eval(RESERVE_LUA_SCRIPT, 1, `stock:${itemId}`);
 
     if (remainingStock >= 0) {
+      // Non-blocking asynchronous write to PostgreSQL
       pool.query(
         'INSERT INTO reservations (user_id, item_id, created_at) VALUES ($1, $2, NOW())',
         [userId, itemId]
@@ -120,6 +127,7 @@ app.post('/api/reserve', async (req, res) => {
   }
 });
 
+// Status readout endpoint
 app.get('/api/status', async (req, res) => {
   try {
     const itemId = req.query.itemId || 'item_1';
@@ -134,9 +142,10 @@ app.get('/api/status', async (req, res) => {
   }
 });
 
+// Audit ledger logs endpoint
 app.get('/api/logs', async (req, res) => {
   try {
-    const { itemId = 'item_1', limit = 20 } = req.query;
+    const { itemId = 'item_1', limit = 50 } = req.query;
     const result = await pool.query(
       'SELECT id, user_id, item_id, status, created_at FROM reservations WHERE item_id = $1 ORDER BY id DESC LIMIT $2',
       [itemId, limit]
@@ -149,6 +158,22 @@ app.get('/api/logs', async (req, res) => {
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
+});
+
+// Catch-all route to serve the built React index.html
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+
+  const distIndex = path.join(distPath, 'index.html');
+  const publicIndex = path.join(publicPath, 'index.html');
+
+  if (fs.existsSync(distIndex)) {
+    return res.sendFile(distIndex);
+  } else if (fs.existsSync(publicIndex)) {
+    return res.sendFile(publicIndex);
+  }
+  
+  res.status(404).send('Build index.html not found. Make sure to run npm run build.');
 });
 
 const PORT = process.env.PORT || 5000;

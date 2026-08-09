@@ -5,8 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
-    outDir: 'public',
-    emptyOutDir: true,
+    outDir: 'public', // Outputs index.html directly inside public/
+    emptyOutDir: false,
   },
   server: {
     proxy: {
