@@ -109,11 +109,11 @@ app.post('/api/reserve', async (req, res) => {
     const remainingStock = await redis.eval(RESERVE_LUA_SCRIPT, 1, `stock:${itemId}`);
 
     if (remainingStock >= 0) {
-      // Non-blocking asynchronous write to PostgreSQL
+      // Clean, standard PostgreSQL insert relying on table DEFAULT for status and created_at
       pool.query(
-        'INSERT INTO reservations (user_id, item_id, created_at) VALUES ($1, $2, NOW())',
-        [userId, itemId]
-      ).catch((err) => console.error('[DB Write Warning]:', err.message));
+        'INSERT INTO reservations (user_id, item_id, status) VALUES ($1, $2, $3)',
+        [userId, itemId, 'CONFIRMED']
+      ).catch((err) => console.error('[DB Write Error]:', err.message));
 
       return res.status(200).json({
         success: true,
