@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Paths for build static assets
+// Paths for built static assets
 const publicPath = path.join(__dirname, 'public');
 const distPath = path.join(__dirname, 'dist');
 
@@ -17,28 +17,45 @@ const distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
 app.use(express.static(publicPath));
 
-// Database connection pool (Zerops / Local defaults)
+// Environment variable helper to sanitize unexpanded Zerops template strings
+const sanitizeEnv = (val, fallback) => {
+  if (!val || typeof val !== 'string' || val.includes('${')) {
+    return fallback;
+  }
+  return val.trim();
+};
+
+// Database connection pool (Zerops / Local defaults with fallback guards)
+const dbHost = sanitizeEnv(process.env.DB_HOST, 'db');
+const dbPort = parseInt(process.env.DB_PORT || '5432', 10);
+const dbUser = sanitizeEnv(process.env.DB_USER || process.env.POSTGRES_USER, 'db');
+const dbPassword = sanitizeEnv(process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD, 'password');
+const dbName = sanitizeEnv(process.env.DB_NAME || process.env.POSTGRES_DB, 'db');
+
 const pool = new Pool({
-  host: process.env.DB_HOST || 'db',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  user: process.env.DB_USER || process.env.POSTGRES_USER || 'root',
-  password: process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD || 'password',
-  database: process.env.DB_NAME || process.env.POSTGRES_DB || 'valkyrie_db',
+  host: dbHost,
+  port: dbPort,
+  user: dbUser,
+  password: dbPassword,
+  database: dbName,
   max: 20,
   idleTimeoutMillis: 30000,
 });
 
 // Valkey / Redis connection
+const valkeyHost = sanitizeEnv(process.env.VALKEY_HOST || process.env.REDIS_HOST, 'valkey');
+const valkeyPort = parseInt(process.env.VALKEY_PORT || process.env.REDIS_PORT || '6379', 10);
+const valkeyPassword = sanitizeEnv(process.env.VALKEY_PASSWORD || process.env.REDIS_PASSWORD, undefined);
+
 const redis = new Redis({
-  host: process.env.VALKEY_HOST || process.env.REDIS_HOST || 'valkey',
-  port: parseInt(process.env.VALKEY_PORT || process.env.REDIS_PORT || '6379', 10),
-  password: process.env.VALKEY_PASSWORD || process.env.REDIS_PASSWORD || undefined,
+  host: valkeyHost,
+  port: valkeyPort,
+  password: valkeyPassword,
   retryStrategy: (times) => Math.min(times * 50, 2000),
   maxRetriesPerRequest: 3,
 });
 
 redis.on('error', (err) => {
-  // Prevent unhandled error crashes
   if (!err.message.includes('NOAUTH')) {
     console.error('[Valkey Redis Error]:', err.message);
   }
@@ -109,7 +126,7 @@ app.post('/api/reserve', async (req, res) => {
     const remainingStock = await redis.eval(RESERVE_LUA_SCRIPT, 1, `stock:${itemId}`);
 
     if (remainingStock >= 0) {
-      // Clean, standard PostgreSQL insert relying on table DEFAULT for status and created_at
+      // Clean PostgreSQL insert
       pool.query(
         'INSERT INTO reservations (user_id, item_id, status) VALUES ($1, $2, $3)',
         [userId, itemId, 'CONFIRMED']
@@ -155,15 +172,13 @@ app.get('/api/status', async (req, res) => {
 app.get('/api/logs', async (req, res) => {
   try {
     const itemId = req.query.itemId || 'item_1';
-    const limitNum = parseInt(req.query.limit || '50', 10); //  Parsed safely to Integer
+    const limitNum = parseInt(req.query.limit || '50', 10);
 
-    // Query 1: Fetch recent reservation logs
     const result = await pool.query(
       'SELECT id, user_id, item_id, status, created_at FROM reservations WHERE item_id = $1 ORDER BY id DESC LIMIT $2',
       [itemId, limitNum]
     );
 
-    // Query 2: Fetch total row count for the counter card
     const countResult = await pool.query(
       'SELECT COUNT(*)::int AS total FROM reservations WHERE item_id = $1',
       [itemId]
@@ -176,7 +191,6 @@ app.get('/api/logs', async (req, res) => {
     });
   } catch (err) {
     console.error('[Logs Endpoint Error]:', err.message);
-    // Return a 200 fallback so the React UI doesn't crash on DB errors
     return res.status(200).json({
       itemId: req.query.itemId || 'item_1',
       totalCount: 0,
@@ -198,7 +212,7 @@ app.get('*', (req, res, next) => {
   } else if (fs.existsSync(publicIndex)) {
     return res.sendFile(publicIndex);
   }
-  
+
   res.status(404).send('Build index.html not found. Make sure to run npm run build.');
 });
 
