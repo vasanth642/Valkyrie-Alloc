@@ -48,11 +48,29 @@ export default function App() {
                 fetch(`/api/status?itemId=${itemId}`),
                 fetch(`/api/logs?itemId=${itemId}&limit=50`)
             ]);
-            const sData = await statusRes.json();
-            const lData = await logsRes.json();
-            setRamStock(sData.stock !== undefined ? sData.stock : '0');
-            setSqlCount(lData.totalCount || 0);
-            setLogs(lData.logs || []);
+
+            if (statusRes.ok) {
+                const sData = await statusRes.json();
+                setRamStock(sData.stock !== undefined ? sData.stock : '0');
+            }
+
+            if (logsRes.ok) {
+                const lData = await logsRes.json();
+
+                // Flexibly extract array whether backend returns { logs: [] }, { data: [] }, or raw []
+                const logArray = Array.isArray(lData)
+                    ? lData
+                    : (lData.logs || lData.data || lData.reservations || []);
+
+                const count = lData.totalCount !== undefined
+                    ? lData.totalCount
+                    : logArray.length;
+
+                setSqlCount(count);
+                setLogs(logArray);
+            } else {
+                console.warn('Logs API returned non-200 status:', logsRes.status);
+            }
         } catch (err) {
             console.error('Error fetching logs:', err);
         }
@@ -101,8 +119,11 @@ export default function App() {
         await Promise.all(requests);
         setClaimed(okCount);
         setRejected(failCount);
+
+        // Always refresh stock and logs after simulation finishes
         await fetchStatus();
-        if (activeTab === 'dashboard') await fetchLogs();
+        await fetchLogs();
+
         setIsSimulating(false);
     };
 
@@ -572,7 +593,9 @@ if (res.status === 200) {
                                                         <td className="text-violet-300 font-semibold">{log.user_id}</td>
                                                         <td>{log.item_id}</td>
                                                         <td><span className="bg-violet-950 text-violet-300 border border-violet-800/60 px-2 py-0.5 rounded text-[10px]">{log.status}</span></td>
-                                                        <td className="text-slate-500">{new Date(log.created_at).toLocaleString()}</td>
+                                                        <td className="text-slate-500">
+                                                            {log.created_at ? new Date(log.created_at).toLocaleString() : 'N/A'}
+                                                        </td>
                                                     </tr>
                                                 ))
                                             )}
