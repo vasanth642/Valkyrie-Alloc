@@ -127,19 +127,37 @@ export default function App() {
         setIsSimulating(false);
     };
 
-    const exportCSV = () => {
-        if (!logs.length) return alert('No logs available to export.');
+    const exportCSV = async () => {
+    try {
+        // Fetch ALL logs for the item without pagination limit
+        const res = await fetch(`/api/logs?itemId=${itemId}&limit=0`);
+        if (!res.ok) throw new Error('Failed to fetch full logs for export');
+        
+        const data = await res.json();
+        const exportLogs = Array.isArray(data) 
+            ? data 
+            : (data.logs || data.data || data.reservations || []);
+
+        if (!exportLogs.length) {
+            return alert('No records available in PostgreSQL to export.');
+        }
+
         let csv = 'ID,User_ID,Item_ID,Status,Created_At\n';
-        logs.forEach(l => {
-            csv += `${l.id},${l.user_id},${l.item_id},${l.status},${l.created_at}\n`;
+        exportLogs.forEach(l => {
+            csv += `${l.id || ''},${l.user_id || ''},${l.item_id || ''},${l.status || ''},${l.created_at || ''}\n`;
         });
+
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `valkyrie_reservations_${Date.now()}.csv`;
+        a.download = `valkyrie_reservations_${itemId}_${Date.now()}.csv`;
         a.click();
-    };
+        window.URL.revokeObjectURL(url);
+    } catch (err) {
+        alert('Error exporting CSV: ' + err.message);
+    }
+};
 
     return (
         <div className="relative min-h-screen text-slate-200 flex flex-col justify-between overflow-x-hidden">

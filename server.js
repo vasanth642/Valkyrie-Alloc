@@ -172,12 +172,19 @@ app.get('/api/status', async (req, res) => {
 app.get('/api/logs', async (req, res) => {
   try {
     const itemId = req.query.itemId || 'item_1';
-    const limitNum = parseInt(req.query.limit || '50', 10);
+    const limitParam = req.query.limit;
 
-    const result = await pool.query(
-      'SELECT id, user_id, item_id, status, created_at FROM reservations WHERE item_id = $1 ORDER BY id DESC LIMIT $2',
-      [itemId, limitNum]
-    );
+    let queryText = 'SELECT id, user_id, item_id, status, created_at FROM reservations WHERE item_id = $1 ORDER BY id DESC';
+    let queryParams = [itemId];
+
+    // Apply limit only if limit is specified and not 0 / 'all'
+    if (limitParam && limitParam !== '0' && limitParam !== 'all') {
+      const limitNum = parseInt(limitParam, 10);
+      queryText += ' LIMIT $2';
+      queryParams.push(limitNum);
+    }
+
+    const result = await pool.query(queryText, queryParams);
 
     const countResult = await pool.query(
       'SELECT COUNT(*)::int AS total FROM reservations WHERE item_id = $1',
