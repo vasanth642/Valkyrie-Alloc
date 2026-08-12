@@ -154,18 +154,35 @@ app.get('/api/status', async (req, res) => {
 // Audit ledger logs endpoint
 app.get('/api/logs', async (req, res) => {
   try {
-    const { itemId = 'item_1', limit = 50 } = req.query;
+    const itemId = req.query.itemId || 'item_1';
+    const limitNum = parseInt(req.query.limit || '50', 10); //  Parsed safely to Integer
+
+    // Query 1: Fetch recent reservation logs
     const result = await pool.query(
       'SELECT id, user_id, item_id, status, created_at FROM reservations WHERE item_id = $1 ORDER BY id DESC LIMIT $2',
-      [itemId, limit]
+      [itemId, limitNum]
     );
+
+    // Query 2: Fetch total row count for the counter card
+    const countResult = await pool.query(
+      'SELECT COUNT(*)::int AS total FROM reservations WHERE item_id = $1',
+      [itemId]
+    );
+
     return res.status(200).json({
       itemId,
-      totalCount: result.rowCount,
-      logs: result.rows
+      totalCount: countResult.rows[0]?.total || 0,
+      logs: result.rows || []
     });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    console.error('[Logs Endpoint Error]:', err.message);
+    // Return a 200 fallback so the React UI doesn't crash on DB errors
+    return res.status(200).json({
+      itemId: req.query.itemId || 'item_1',
+      totalCount: 0,
+      logs: [],
+      error: err.message
+    });
   }
 });
 
